@@ -29,51 +29,57 @@ const PRESETS = {
 };
 
 let settings = null;
+let lang = "he";
 
 function formatMs(ms) {
   const mins = Math.floor(ms / 60000);
-  if (mins < 60) return `${mins} דק'`;
+  const minLabel = lang === "he" ? "דק'" : "min";
+  if (mins < 60) return `${mins} ${minLabel}`;
   const h = Math.floor(mins / 60);
   return `${h}:${(mins % 60).toString().padStart(2, "0")}`;
 }
 
 function render() {
-  // טוגלים
-  document.querySelectorAll(".toggle").forEach(t => {
-    t.classList.toggle("on", !!settings[t.dataset.key]);
+  document.querySelectorAll(".toggle").forEach(el => {
+    el.classList.toggle("on", !!settings[el.dataset.key]);
   });
-  // sliders
   document.getElementById("idle-slider").value = settings.idleSeconds;
   document.getElementById("idle-val").textContent = settings.idleSeconds;
   document.getElementById("grace-slider").value = settings.graceMinutes;
   document.getElementById("grace-val").textContent = settings.graceMinutes;
+
+  document.querySelectorAll(".lang-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.lang === lang);
+  });
 }
 
 async function save() {
   chrome.runtime.sendMessage({ type: "saveSettings", settings });
 }
 
-// טען הגדרות וסטטיסטיקה
-chrome.runtime.sendMessage({ type: "getSettings" }, (s) => {
-  settings = s;
+(async () => {
+  lang = await getLang();
+  applyI18n(lang);
+
+  settings = await new Promise(r => chrome.runtime.sendMessage({ type: "getSettings" }, r));
   render();
-});
 
-chrome.runtime.sendMessage({ type: "getStats" }, (stats) => {
-  if (!stats) return;
-  document.getElementById("today").textContent = formatMs(stats.todayMs);
-  document.getElementById("week").textContent = formatMs(stats.weekMs);
+  const stats = await new Promise(r => chrome.runtime.sendMessage({ type: "getStats" }, r));
+  if (stats) {
+    document.getElementById("today").textContent = formatMs(stats.todayMs);
+    document.getElementById("week").textContent = formatMs(stats.weekMs);
 
-  const remaining = stats.graceUntil - Date.now();
-  if (remaining > 0) {
-    const banner = document.getElementById("grace-banner");
-    banner.classList.add("active");
-    const mins = Math.ceil(remaining / 60000);
-    document.getElementById("grace-time").textContent = `עוד ${mins} דק'`;
+    const remaining = stats.graceUntil - Date.now();
+    if (remaining > 0) {
+      const banner = document.getElementById("grace-banner");
+      banner.classList.add("active");
+      const mins = Math.ceil(remaining / 60000);
+      const template = t("popup.grace.remaining", lang);
+      document.getElementById("grace-time").textContent = template.replace("{n}", mins);
+    }
   }
-});
+})();
 
-// טוגלים
 document.querySelectorAll(".toggle").forEach(t => {
   t.addEventListener("click", () => {
     const key = t.dataset.key;
@@ -83,7 +89,6 @@ document.querySelectorAll(".toggle").forEach(t => {
   });
 });
 
-// sliders
 document.getElementById("idle-slider").addEventListener("input", (e) => {
   settings.idleSeconds = parseInt(e.target.value, 10);
   document.getElementById("idle-val").textContent = settings.idleSeconds;
@@ -95,7 +100,6 @@ document.getElementById("grace-slider").addEventListener("input", (e) => {
   save();
 });
 
-// presets
 document.querySelectorAll(".preset").forEach(b => {
   b.addEventListener("click", () => {
     settings = { ...PRESETS[b.dataset.preset] };
@@ -104,9 +108,29 @@ document.querySelectorAll(".preset").forEach(b => {
   });
 });
 
-// סיום grace
 document.getElementById("end-grace").addEventListener("click", () => {
   chrome.runtime.sendMessage({ type: "resetGrace" }, () => {
     document.getElementById("grace-banner").classList.remove("active");
+  });
+});
+
+document.querySelectorAll(".lang-btn").forEach(b => {
+  b.addEventListener("click", async () => {
+    lang = b.dataset.lang;
+    await setLang(lang);
+    applyI18n(lang);
+    render();
+    // ריענון תוויות תלויות-לוקאל
+    const stats = await new Promise(r => chrome.runtime.sendMessage({ type: "getStats" }, r));
+    if (stats) {
+      document.getElementById("today").textContent = formatMs(stats.todayMs);
+      document.getElementById("week").textContent = formatMs(stats.weekMs);
+      const remaining = stats.graceUntil - Date.now();
+      if (remaining > 0) {
+        const mins = Math.ceil(remaining / 60000);
+        document.getElementById("grace-time").textContent =
+          t("popup.grace.remaining", lang).replace("{n}", mins);
+      }
+    }
   });
 });

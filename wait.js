@@ -19,33 +19,15 @@ const statsBar = document.getElementById("stats-bar");
 
 targetEl.textContent = target || "";
 
-const CATEGORY_LABELS = {
-  learn: "📚 ללמוד משהו ספציפי",
-  "tech-news": "📰 חדשות טכנולוגיה",
-  music: "🎵 מוזיקה לרקע",
-  sent: "🎬 סרטון ששלחו לי",
-  work: "💼 משהו לעבודה / דחוף",
-  news: "🌍 חדשות / אקטואליה",
-  hobby: "🎨 תחביב / עניין אישי",
-  waste: "🕳️ סתם, לבזבז זמן",
-};
-
-const PUNS_BY_CATEGORY = {
-  waste: [
-    "🎣 האלגוריתם רעב. אתה הפיתיון.",
-    "📺 'סרטון אחד' זה אף פעם לא סרטון אחד",
-    "🧠 המוח שלך אמר תודה אם תסגור עכשיו",
-  ],
-  music: ["🎵 Spotify קיים. גם רדיו. סתם אומר.", "🎧 תוך 3 דקות תהיה בסרטון על קוסמולוגיה"],
-  learn: ["📖 אולי ספר? סתם זרקתי רעיון", "✍️ ידע אמיתי דורש גם הפסקות"],
-  default: [
-    "⏳ כל דקה שעוברת היא דקה שלא תחזור",
-    "🌅 השמש בחוץ. היא לא תהיה שם לנצח.",
-    "💤 רגע, באמת התכוונת להיכנס או שזה רפלקס?",
-  ],
+const PUN_KEYS = {
+  waste: ["pun.waste.0", "pun.waste.1", "pun.waste.2"],
+  music: ["pun.music.0", "pun.music.1"],
+  learn: ["pun.learn.0", "pun.learn.1"],
+  default: ["pun.default.0", "pun.default.1", "pun.default.2"],
 };
 
 let settings = null;
+let lang = "he";
 let chosenCategory = null;
 
 function showView(name) {
@@ -58,32 +40,34 @@ function showView(name) {
 
 function formatMs(ms) {
   const mins = Math.floor(ms / 60000);
-  if (mins < 60) return `${mins} דק'`;
+  const minLabel = lang === "he" ? "דק'" : "min";
+  const hrLabel = lang === "he" ? "שע'" : "h";
+  if (mins < 60) return `${mins} ${minLabel}`;
   const h = Math.floor(mins / 60);
-  return `${h}:${(mins % 60).toString().padStart(2, "0")} שע'`;
+  return `${h}:${(mins % 60).toString().padStart(2, "0")} ${hrLabel}`;
 }
 
-// ===== bootstrap =====
-chrome.runtime.sendMessage({ type: "getSettings" }, (s) => {
-  settings = s;
-  chrome.runtime.sendMessage({ type: "getStats" }, (stats) => {
-    if (settings.showStats && stats) {
-      todayEl.textContent = formatMs(stats.todayMs);
-      weekEl.textContent = formatMs(stats.weekMs);
-    } else {
-      statsBar.style.display = "none";
-    }
-    startFlow();
-  });
-});
+(async () => {
+  lang = await getLang();
+  applyI18n(lang);
 
-function startFlow() {
-  if (!settings.movingCancel) {
-    cancelBtn.style.opacity = "0.5";
+  settings = await new Promise(r => chrome.runtime.sendMessage({ type: "getSettings" }, r));
+  const stats = await new Promise(r => chrome.runtime.sendMessage({ type: "getStats" }, r));
+
+  if (settings.showStats && stats) {
+    todayEl.textContent = formatMs(stats.todayMs);
+    weekEl.textContent = formatMs(stats.weekMs);
+  } else {
+    statsBar.style.display = "none";
   }
 
+  startFlow();
+})();
+
+function startFlow() {
+  if (!settings.movingCancel) cancelBtn.style.opacity = "0.5";
+
   if (quickMode) {
-    // grace period - שאלה מהירה בלבד
     showView("quick");
     document.getElementById("quick-yes").addEventListener("click", () => {
       chrome.runtime.sendMessage({ type: "proceed", target });
@@ -102,13 +86,13 @@ function startFlow() {
   }
 }
 
-// ===== מסך 1: קטגוריה =====
 document.getElementById("categories").addEventListener("click", (e) => {
   const btn = e.target.closest(".cat-btn");
   if (!btn) return;
   chosenCategory = btn.dataset.cat;
   chrome.runtime.sendMessage({ type: "logIntent", category: chosenCategory, target });
-  intentEl.textContent = "באת בשביל: " + CATEGORY_LABELS[chosenCategory];
+  const catLabel = t("cat." + chosenCategory, lang);
+  intentEl.textContent = t("count.intent.prefix", lang) + catLabel;
   goToCountdownOrNext();
 });
 
@@ -121,7 +105,6 @@ function goToCountdownOrNext() {
   }
 }
 
-// ===== מסך 2: ספירה idle =====
 let tickHandle = null;
 
 function startIdleCountdown(maxSec) {
@@ -150,15 +133,15 @@ function startIdleCountdown(maxSec) {
   }, 1000);
 }
 
-// ===== מסך 3: בחירה =====
 function showChoiceOrProceed() {
   if (!settings.enableFinalChoice) {
     chrome.runtime.sendMessage({ type: "proceed", target });
     return;
   }
   showView("choice");
-  const pool = PUNS_BY_CATEGORY[chosenCategory] || PUNS_BY_CATEGORY.default;
-  punEl.textContent = pool[Math.floor(Math.random() * pool.length)];
+  const keys = PUN_KEYS[chosenCategory] || PUN_KEYS.default;
+  const key = keys[Math.floor(Math.random() * keys.length)];
+  punEl.textContent = t(key, lang);
 }
 
 document.getElementById("yes").addEventListener("click", () => {
@@ -168,7 +151,6 @@ document.getElementById("no").addEventListener("click", () => {
   chrome.runtime.sendMessage({ type: "close" });
 });
 
-// ===== כפתור יציאה דחופה =====
 function repositionCancel() {
   if (!settings || !settings.movingCancel) return;
   const margin = 20;

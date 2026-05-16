@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html>
 <head>
   <meta charset="UTF-8">
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&family=Inter:wght@300;400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
     body {
       width: 340px;
       margin: 0;
       padding: 16px;
-      font-family: "Heebo", -apple-system, "Segoe UI", Arial, sans-serif;
+      font-family: "Heebo", "Inter", -apple-system, "Segoe UI", Arial, sans-serif;
       background: #0f1410;
       color: #fff;
       font-size: 14px;
@@ -107,7 +107,6 @@
     .row-title { font-size: 0.85rem; }
     .row-desc { font-size: 0.7rem; opacity: 0.5; margin-top: 1px; }
 
-    /* טוגל */
     .toggle {
       position: relative;
       width: 38px; height: 22px;
@@ -120,22 +119,50 @@
     .toggle::after {
       content: "";
       position: absolute;
-      top: 2px; right: 2px;
+      top: 2px;
       width: 18px; height: 18px;
       background: #888;
       border-radius: 50%;
       transition: all 0.2s;
     }
+    [dir="rtl"] .toggle::after { right: 2px; }
+    [dir="ltr"] .toggle::after { left: 2px; }
     .toggle.on { background: rgba(0,255,136,0.3); }
-    .toggle.on::after { background: #00ff88; right: 18px; }
+    .toggle.on::after { background: #00ff88; }
+    [dir="rtl"] .toggle.on::after { right: 18px; }
+    [dir="ltr"] .toggle.on::after { left: 18px; }
 
-    /* slider */
     .slider-row { padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .slider-row .row-title { display: flex; justify-content: space-between; margin-bottom: 6px; }
     .slider-row .value { color: #00ff88; font-family: "Orbitron", monospace; }
     input[type=range] {
       width: 100%;
       accent-color: #00ff88;
+    }
+
+    /* בוחר שפה */
+    .lang-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 0;
+    }
+    .lang-buttons { display: flex; gap: 4px; }
+    .lang-btn {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #aaa;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .lang-btn.active {
+      background: rgba(0,255,136,0.15);
+      border-color: rgba(0,255,136,0.5);
+      color: #aaffcc;
     }
 
     .footer {
@@ -149,88 +176,98 @@
   </style>
 </head>
 <body>
-  <h1>🎬 YouTube Wait</h1>
-  <div class="subtitle">שלוט בכמה חיכוך אתה רוצה</div>
+  <h1 data-i18n="popup.title">🎬 YouTube Wait</h1>
+  <div class="subtitle" data-i18n="popup.subtitle">שלוט בכמה חיכוך אתה רוצה</div>
 
   <div class="stats">
-    <div class="stat"><div class="num" id="today">--</div><div class="label">היום</div></div>
-    <div class="stat"><div class="num" id="week">--</div><div class="label">השבוע</div></div>
+    <div class="stat"><div class="num" id="today">--</div><div class="label" data-i18n="popup.stat.today">היום</div></div>
+    <div class="stat"><div class="num" id="week">--</div><div class="label" data-i18n="popup.stat.week">השבוע</div></div>
   </div>
 
   <div class="grace-banner" id="grace-banner">
-    <span>🟢 grace פעיל: <span id="grace-time">--</span></span>
-    <button id="end-grace">סיים עכשיו</button>
+    <span><span data-i18n="popup.grace.prefix">🟢 grace פעיל: </span><span id="grace-time">--</span></span>
+    <button id="end-grace" data-i18n="popup.grace.end">סיים עכשיו</button>
   </div>
 
-  <div class="section-title">פריסט מהיר</div>
+  <div class="section-title" data-i18n="popup.section.preset">פריסט מהיר</div>
   <div class="presets">
-    <button class="preset" data-preset="vacation"><span class="emoji">🏖️</span>חופש</button>
-    <button class="preset" data-preset="normal"><span class="emoji">⚖️</span>רגיל</button>
-    <button class="preset" data-preset="study"><span class="emoji">📚</span>לימודים</button>
+    <button class="preset" data-preset="vacation"><span class="emoji">🏖️</span><span data-i18n="popup.preset.vacation">חופש</span></button>
+    <button class="preset" data-preset="normal"><span class="emoji">⚖️</span><span data-i18n="popup.preset.normal">רגיל</span></button>
+    <button class="preset" data-preset="study"><span class="emoji">📚</span><span data-i18n="popup.preset.study">לימודים</span></button>
   </div>
 
-  <div class="section-title">פונקציות</div>
+  <div class="section-title" data-i18n="popup.section.features">פונקציות</div>
 
   <div class="row">
     <div class="row-info">
-      <div class="row-title">תוסף פעיל</div>
-      <div class="row-desc">כיבוי כולל של מסך ההמתנה</div>
+      <div class="row-title" data-i18n="popup.enabled.title">תוסף פעיל</div>
+      <div class="row-desc" data-i18n="popup.enabled.desc">כיבוי כולל של מסך ההמתנה</div>
     </div>
     <div class="toggle" data-key="enabled"></div>
   </div>
 
   <div class="row">
     <div class="row-info">
-      <div class="row-title">📊 מעקב זמן</div>
-      <div class="row-desc">הצגת זמן בזבוז יומי/שבועי</div>
+      <div class="row-title" data-i18n="popup.stats.title">📊 מעקב זמן</div>
+      <div class="row-desc" data-i18n="popup.stats.desc">הצגת זמן בזבוז יומי/שבועי</div>
     </div>
     <div class="toggle" data-key="showStats"></div>
   </div>
 
   <div class="row">
     <div class="row-info">
-      <div class="row-title">🎯 בחירת קטגוריה</div>
-      <div class="row-desc">"למה אתה נכנס?" לפני הכניסה</div>
+      <div class="row-title" data-i18n="popup.categories.title">🎯 בחירת קטגוריה</div>
+      <div class="row-desc" data-i18n="popup.categories.desc">"למה אתה נכנס?" לפני הכניסה</div>
     </div>
     <div class="toggle" data-key="enableCategories"></div>
   </div>
 
   <div class="row">
     <div class="row-info">
-      <div class="row-title">🎭 מסך בחירה סופי</div>
-      <div class="row-desc">כן/לא עם פאן בסוף</div>
+      <div class="row-title" data-i18n="popup.finalchoice.title">🎭 מסך בחירה סופי</div>
+      <div class="row-desc" data-i18n="popup.finalchoice.desc">כן/לא עם פאן בסוף</div>
     </div>
     <div class="toggle" data-key="enableFinalChoice"></div>
   </div>
 
   <div class="row">
     <div class="row-info">
-      <div class="row-title">🏃 כפתור יציאה נסתר</div>
-      <div class="row-desc">קופץ למיקום אקראי</div>
+      <div class="row-title" data-i18n="popup.movecancel.title">🏃 כפתור יציאה נסתר</div>
+      <div class="row-desc" data-i18n="popup.movecancel.desc">קופץ למיקום אקראי</div>
     </div>
     <div class="toggle" data-key="movingCancel"></div>
   </div>
 
   <div class="slider-row">
     <div class="row-title">
-      <span>⏱️ ספירת idle</span>
-      <span class="value"><span id="idle-val">10</span> שנ'</span>
+      <span data-i18n="popup.idle.title">⏱️ ספירת idle</span>
+      <span class="value"><span id="idle-val">10</span> <span data-i18n="popup.idle.unit">שנ'</span></span>
     </div>
     <input type="range" id="idle-slider" min="0" max="30" step="1">
-    <div class="row-desc" style="font-size: 0.7rem; opacity: 0.5; margin-top: 2px;">0 = ללא ספירה</div>
+    <div class="row-desc" style="font-size: 0.7rem; opacity: 0.5; margin-top: 2px;" data-i18n="popup.idle.desc">0 = ללא ספירה</div>
   </div>
 
   <div class="slider-row">
     <div class="row-title">
-      <span>🕐 Grace period</span>
-      <span class="value"><span id="grace-val">30</span> דק'</span>
+      <span data-i18n="popup.grace.title">🕐 Grace period</span>
+      <span class="value"><span id="grace-val">30</span> <span data-i18n="popup.grace.unit">דק'</span></span>
     </div>
     <input type="range" id="grace-slider" min="0" max="120" step="5">
-    <div class="row-desc" style="font-size: 0.7rem; opacity: 0.5; margin-top: 2px;">אחרי "כן" - חלון של גישה חופשית</div>
+    <div class="row-desc" style="font-size: 0.7rem; opacity: 0.5; margin-top: 2px;" data-i18n="popup.grace.desc">אחרי "כן" - חלון של גישה חופשית</div>
   </div>
 
-  <div class="footer">השינויים נשמרים אוטומטית</div>
+  <div class="section-title" data-i18n="popup.section.language">שפה</div>
+  <div class="lang-row">
+    <span>🌐</span>
+    <div class="lang-buttons">
+      <button class="lang-btn" data-lang="he">עברית</button>
+      <button class="lang-btn" data-lang="en">English</button>
+    </div>
+  </div>
 
+  <div class="footer" data-i18n="popup.footer">השינויים נשמרים אוטומטית</div>
+
+  <script src="i18n.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

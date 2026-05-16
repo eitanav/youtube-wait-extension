@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>רגע אחד...</title>
+  <title>...</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Heebo:wght@300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Heebo:wght@300;400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
     html, body {
       margin: 0; padding: 0;
       height: 100vh; width: 100vw;
       overflow: hidden;
-      font-family: "Heebo", -apple-system, "Segoe UI", Arial, sans-serif;
+      font-family: "Heebo", "Inter", -apple-system, "Segoe UI", Arial, sans-serif;
       background: radial-gradient(ellipse at center, #0a1a0a 0%, #000 80%);
       color: #fff;
     }
@@ -27,7 +27,6 @@
     .view.active { display: flex; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: none; } }
 
-    /* פס סטטיסטיקה עליון */
     #stats-bar {
       position: absolute;
       top: 0; left: 0; right: 0;
@@ -51,7 +50,6 @@
     h1 { font-weight: 300; font-size: 1.8rem; margin: 0 0 0.5rem; }
     .sub { opacity: 0.5; font-size: 0.95rem; margin-bottom: 2rem; text-align: center; max-width: 500px; }
 
-    /* === מסך 1: קטגוריה === */
     .categories {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -68,15 +66,15 @@
       cursor: pointer;
       font-family: inherit;
       font-size: 1rem;
-      text-align: right;
+      text-align: start;
       transition: all 0.15s;
     }
     .cat-btn:hover {
       background: rgba(0,255,136,0.08);
       border-color: rgba(0,255,136,0.4);
-      transform: translateX(-4px);
     }
-    .cat-btn .emoji { font-size: 1.3rem; margin-left: 0.5rem; }
+    [dir="rtl"] .cat-btn:hover { transform: translateX(-4px); }
+    [dir="ltr"] .cat-btn:hover { transform: translateX(4px); }
     .cat-btn.honest {
       border-color: rgba(255,0,51,0.3);
       color: #ff99aa;
@@ -86,7 +84,6 @@
       border-color: rgba(255,0,51,0.5);
     }
 
-    /* === מסך 2: ספירה idle === */
     .countdown {
       font-family: "Orbitron", monospace;
       font-weight: 900;
@@ -124,7 +121,6 @@
       opacity: 0.8;
     }
 
-    /* === כפתור ביטול נסתר === */
     #cancel {
       position: absolute;
       background: transparent;
@@ -143,8 +139,7 @@
       border-color: rgba(255,255,255,0.2);
     }
 
-    /* === מסך 3: בחירה סופית === */
-    #choice h2 { font-weight: 400; font-size: 1.8rem; margin: 0; }
+    #choice h2, #view-quick h1 { font-weight: 400; font-size: 1.8rem; margin: 0; }
     .pun { opacity: 0.6; font-size: 1rem; margin: 1rem 0 1.5rem; font-style: italic; }
     .choices { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
     .choice-btn {
@@ -180,77 +175,76 @@
 <body>
   <div id="stats-bar">
     <div>
-      <div class="label">היום ביוטיוב</div>
+      <div class="label" data-i18n="stats.today">היום ביוטיוב</div>
       <div class="today" id="today-time">--</div>
     </div>
     <div class="week">
-      השבוע: <span id="week-time">--</span>
+      <span data-i18n="stats.week">השבוע:</span> <span id="week-time">--</span>
     </div>
   </div>
 
   <div id="stage">
 
-    <!-- מסך 1: קטגוריה -->
     <div class="view active" id="view-category">
-      <h1>למה אתה נכנס ליוטיוב?</h1>
-      <div class="sub">בחר בכנות - זה רק בינך לבין עצמך</div>
+      <h1 data-i18n="cat.title">למה אתה נכנס ליוטיוב?</h1>
+      <div class="sub" data-i18n="cat.subtitle">בחר בכנות - זה רק בינך לבין עצמך</div>
       <div class="categories" id="categories">
-        <button class="cat-btn" data-cat="learn"><span class="emoji">📚</span>ללמוד משהו ספציפי</button>
-        <button class="cat-btn" data-cat="tech-news"><span class="emoji">📰</span>חדשות טכנולוגיה</button>
-        <button class="cat-btn" data-cat="music"><span class="emoji">🎵</span>מוזיקה לרקע</button>
-        <button class="cat-btn" data-cat="sent"><span class="emoji">🎬</span>סרטון ששלחו לי</button>
-        <button class="cat-btn" data-cat="work"><span class="emoji">💼</span>משהו לעבודה / דחוף</button>
-        <button class="cat-btn" data-cat="news"><span class="emoji">🌍</span>חדשות / אקטואליה</button>
-        <button class="cat-btn" data-cat="hobby"><span class="emoji">🎨</span>תחביב / עניין אישי</button>
-        <button class="cat-btn honest" data-cat="waste"><span class="emoji">🕳️</span>סתם, לבזבז זמן</button>
+        <button class="cat-btn" data-cat="learn" data-i18n="cat.learn">📚 ללמוד משהו ספציפי</button>
+        <button class="cat-btn" data-cat="tech-news" data-i18n="cat.tech-news">📰 חדשות טכנולוגיה</button>
+        <button class="cat-btn" data-cat="music" data-i18n="cat.music">🎵 מוזיקה לרקע</button>
+        <button class="cat-btn" data-cat="sent" data-i18n="cat.sent">🎬 סרטון ששלחו לי</button>
+        <button class="cat-btn" data-cat="work" data-i18n="cat.work">💼 משהו לעבודה / דחוף</button>
+        <button class="cat-btn" data-cat="news" data-i18n="cat.news">🌍 חדשות / אקטואליה</button>
+        <button class="cat-btn" data-cat="hobby" data-i18n="cat.hobby">🎨 תחביב / עניין אישי</button>
+        <button class="cat-btn honest" data-cat="waste" data-i18n="cat.waste">🕳️ סתם, לבזבז זמן</button>
       </div>
     </div>
 
-    <!-- מסך 2: ספירה -->
     <div class="view" id="view-countdown">
-      <h1>שב בשקט</h1>
-      <div class="sub">אל תזיז את העכבר, אל תיגע במקלדת. רגע אחד של נוכחות.</div>
+      <h1 data-i18n="count.title">שב בשקט</h1>
+      <div class="sub" data-i18n="count.subtitle">אל תזיז את העכבר, אל תיגע במקלדת. רגע אחד של נוכחות.</div>
       <div class="countdown" id="count">10</div>
-      <div class="idle-hint">כל תנועה <strong>מאפסת את הספירה</strong></div>
+      <div class="idle-hint">
+        <span data-i18n="count.hint.prefix">כל תנועה </span><strong data-i18n="count.hint.bold">מאפסת את הספירה</strong>
+      </div>
       <div class="your-intent" id="your-intent"></div>
     </div>
 
-    <!-- מסך quick: grace period -->
     <div class="view" id="view-quick">
-      <h1>ממשיך לראות? 👀</h1>
-      <div class="sub">אתה בתוך חלון 30 הדקות שאישרת קודם. רק לוודא שאתה עוד מתכוון.</div>
+      <h1 data-i18n="quick.title">ממשיך לראות? 👀</h1>
+      <div class="sub" data-i18n="quick.subtitle">אתה בתוך חלון 30 הדקות שאישרת קודם. רק לוודא שאתה עוד מתכוון.</div>
       <div class="choices">
         <button class="choice-btn yes" id="quick-yes">
-          <span class="label">כן, ממשיך ⏯️</span>
-          <span class="desc">חזרה לסרטונים, מאריך את ה-30 דק'</span>
+          <span class="label" data-i18n="quick.yes.label">כן, ממשיך ⏯️</span>
+          <span class="desc" data-i18n="quick.yes.desc">חזרה לסרטונים, מאריך את ה-30 דק'</span>
         </button>
         <button class="choice-btn no" id="quick-no">
-          <span class="label">לא, מספיק 🌳</span>
-          <span class="desc">סגור את הכרטיסייה</span>
+          <span class="label" data-i18n="quick.no.label">לא, מספיק 🌳</span>
+          <span class="desc" data-i18n="quick.no.desc">סגור את הכרטיסייה</span>
         </button>
       </div>
     </div>
 
-    <!-- מסך 3: בחירה -->
     <div class="view" id="view-choice">
-      <h2>אז... להיכנס ליוטיוב?</h2>
+      <h2 data-i18n="choice.title">אז... להיכנס ליוטיוב?</h2>
       <div class="pun" id="pun"></div>
       <div class="choices">
         <button class="choice-btn yes" id="yes">
-          <span class="label">כן, קח את היום שלי 🕳️</span>
-          <span class="desc">אני מוותר על השעתיים הקרובות מרצוני החופשי</span>
+          <span class="label" data-i18n="choice.yes.label">כן, קח את היום שלי 🕳️</span>
+          <span class="desc" data-i18n="choice.yes.desc">אני מוותר על השעתיים הקרובות מרצוני החופשי</span>
         </button>
         <button class="choice-btn no" id="no">
-          <span class="label">לא, יש לי חיים 🌳</span>
-          <span class="desc">סגור את הכרטיסייה הזאת מיד</span>
+          <span class="label" data-i18n="choice.no.label">לא, יש לי חיים 🌳</span>
+          <span class="desc" data-i18n="choice.no.desc">סגור את הכרטיסייה הזאת מיד</span>
         </button>
       </div>
       <div class="target" id="target"></div>
     </div>
 
-    <button id="cancel" title="יציאה דחופה">× יציאה</button>
+    <button id="cancel" data-i18n="exit" data-i18n-title="exit.title">× יציאה</button>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="wait.js"></script>
 </body>
 </html>
