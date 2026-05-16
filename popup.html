@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      width: 340px;
+      margin: 0;
+      padding: 16px;
+      font-family: "Heebo", -apple-system, "Segoe UI", Arial, sans-serif;
+      background: #0f1410;
+      color: #fff;
+      font-size: 14px;
+    }
+    h1 {
+      font-size: 1.05rem;
+      margin: 0 0 4px;
+      font-weight: 700;
+    }
+    .subtitle {
+      opacity: 0.5;
+      font-size: 0.75rem;
+      margin-bottom: 14px;
+    }
+    .stats {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat {
+      flex: 1;
+      background: rgba(255,0,51,0.08);
+      border: 1px solid rgba(255,0,51,0.2);
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .stat .num {
+      font-family: "Orbitron", monospace;
+      font-size: 1.2rem;
+      color: #ff7799;
+      font-weight: 900;
+    }
+    .stat .label { font-size: 0.7rem; opacity: 0.6; margin-top: 2px; }
+
+    .grace-banner {
+      background: rgba(0,255,136,0.08);
+      border: 1px solid rgba(0,255,136,0.3);
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-bottom: 14px;
+      font-size: 0.8rem;
+      display: none;
+    }
+    .grace-banner.active { display: flex; justify-content: space-between; align-items: center; }
+    .grace-banner button {
+      background: transparent;
+      border: 1px solid rgba(0,255,136,0.4);
+      color: #aaffcc;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-family: inherit;
+    }
+    .grace-banner button:hover { background: rgba(0,255,136,0.1); }
+
+    .presets {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .preset {
+      flex: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #ccc;
+      padding: 8px 4px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.75rem;
+      transition: all 0.15s;
+    }
+    .preset:hover { border-color: rgba(0,255,136,0.4); color: #fff; }
+    .preset .emoji { display: block; font-size: 1.1rem; margin-bottom: 2px; }
+
+    .section-title {
+      font-size: 0.75rem;
+      opacity: 0.5;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 14px 0 6px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .row:last-child { border-bottom: none; }
+    .row-info { flex: 1; }
+    .row-title { font-size: 0.85rem; }
+    .row-desc { font-size: 0.7rem; opacity: 0.5; margin-top: 1px; }
+
+    /* טוגל */
+    .toggle {
+      position: relative;
+      width: 38px; height: 22px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 2px; right: 2px;
+      width: 18px; height: 18px;
+      background: #888;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+    .toggle.on { background: rgba(0,255,136,0.3); }
+    .toggle.on::after { background: #00ff88; right: 18px; }
+
+    /* slider */
+    .slider-row { padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .slider-row .row-title { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .slider-row .value { color: #00ff88; font-family: "Orbitron", monospace; }
+    input[type=range] {
+      width: 100%;
+      accent-color: #00ff88;
+    }
+
+    .footer {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.7rem;
+      opacity: 0.4;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎬 YouTube Wait</h1>
+  <div class="subtitle">שלוט בכמה חיכוך אתה רוצה</div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="today">--</div><div class="label">היום</div></div>
+    <div class="stat"><div class="num" id="week">--</div><div class="label">השבוע</div></div>
+  </div>
+
+  <div class="grace-banner" id="grace-banner">
+    <span>🟢 grace פעיל: <span id="grace-time">--</span></span>
+    <button id="end-grace">סיים עכשיו</button>
+  </div>
+
+  <div class="section-title">פריסט מהיר</div>
+  <div class="presets">
+    <button class="preset" data-preset="vacation"><span class="emoji">🏖️</span>חופש</button>
+    <button class="preset" data-preset="normal"><span class="emoji">⚖️</span>רגיל</button>
+    <button class="preset" data-preset="study"><span class="emoji">📚</span>לימודים</button>
+  </div>
+
+  <div class="section-title">פונקציות</div>
+
+  <div class="row">
+    <div class="row-info">
+      <div class="row-title">תוסף פעיל</div>
+      <div class="row-desc">כיבוי כולל של מסך ההמתנה</div>
+    </div>
+    <div class="toggle" data-key="enabled"></div>
+  </div>
+
+  <div class="row">
+    <div class="row-info">
+      <div class="row-title">📊 מעקב זמן</div>
+      <div class="row-desc">הצגת זמן בזבוז יומי/שבועי</div>
+    </div>
+    <div class="toggle" data-key="showStats"></div>
+  </div>
+
+  <div class="row">
+    <div class="row-info">
+      <div class="row-title">🎯 בחירת קטגוריה</div>
+      <div class="row-desc">"למה אתה נכנס?" לפני הכניסה</div>
+    </div>
+    <div class="toggle" data-key="enableCategories"></div>
+  </div>
+
+  <div class="row">
+    <div class="row-info">
+      <div class="row-title">🎭 מסך בחירה סופי</div>
+      <div class="row-desc">כן/לא עם פאן בסוף</div>
+    </div>
+    <div class="toggle" data-key="enableFinalChoice"></div>
+  </div>
+
+  <div class="row">
+    <div class="row-info">
+      <div class="row-title">🏃 כפתור יציאה נסתר</div>
+      <div class="row-desc">קופץ למיקום אקראי</div>
+    </div>
+    <div class="toggle" data-key="movingCancel"></div>
+  </div>
+
+  <div class="slider-row">
+    <div class="row-title">
+      <span>⏱️ ספירת idle</span>
+      <span class="value"><span id="idle-val">10</span> שנ'</span>
+    </div>
+    <input type="range" id="idle-slider" min="0" max="30" step="1">
+    <div class="row-desc" style="font-size: 0.7rem; opacity: 0.5; margin-top: 2px;">0 = ללא ספירה</div>
+  </div>
+
+  <div class="slider-row">
+    <div class="row-title">
+      <span>🕐 Grace period</span>
+      <span class="value"><span id="grace-val">30</span> דק'</span>
+    </div>
+    <input type="range" id="grace-slider" min="0" max="120" step="5">
+    <div class="row-desc" style="font-size: 0.7rem; opacity: 0.5; margin-top: 2px;">אחרי "כן" - חלון של גישה חופשית</div>
+  </div>
+
+  <div class="footer">השינויים נשמרים אוטומטית</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

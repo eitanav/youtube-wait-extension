@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>רגע אחד...</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Heebo:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      height: 100vh; width: 100vw;
+      overflow: hidden;
+      font-family: "Heebo", -apple-system, "Segoe UI", Arial, sans-serif;
+      background: radial-gradient(ellipse at center, #0a1a0a 0%, #000 80%);
+      color: #fff;
+    }
+    #stage {
+      position: relative;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+    .view { display: none; flex-direction: column; align-items: center; animation: fadeIn 0.4s; }
+    .view.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: none; } }
+
+    /* פס סטטיסטיקה עליון */
+    #stats-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      background: linear-gradient(to bottom, rgba(255,0,51,0.15), transparent);
+      border-bottom: 1px solid rgba(255,0,51,0.2);
+    }
+    #stats-bar .today {
+      font-family: "Orbitron", monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #ff5577;
+    }
+    #stats-bar .label { opacity: 0.6; font-size: 0.75rem; }
+    #stats-bar .week { opacity: 0.5; font-size: 0.8rem; }
+
+    h1 { font-weight: 300; font-size: 1.8rem; margin: 0 0 0.5rem; }
+    .sub { opacity: 0.5; font-size: 0.95rem; margin-bottom: 2rem; text-align: center; max-width: 500px; }
+
+    /* === מסך 1: קטגוריה === */
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+      max-width: 700px;
+      width: 100%;
+    }
+    .cat-btn {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 1.1rem 1.3rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1rem;
+      text-align: right;
+      transition: all 0.15s;
+    }
+    .cat-btn:hover {
+      background: rgba(0,255,136,0.08);
+      border-color: rgba(0,255,136,0.4);
+      transform: translateX(-4px);
+    }
+    .cat-btn .emoji { font-size: 1.3rem; margin-left: 0.5rem; }
+    .cat-btn.honest {
+      border-color: rgba(255,0,51,0.3);
+      color: #ff99aa;
+    }
+    .cat-btn.honest:hover {
+      background: rgba(255,0,51,0.08);
+      border-color: rgba(255,0,51,0.5);
+    }
+
+    /* === מסך 2: ספירה idle === */
+    .countdown {
+      font-family: "Orbitron", monospace;
+      font-weight: 900;
+      font-size: 13rem;
+      line-height: 1;
+      color: #00ff88;
+      text-shadow: 0 0 10px #00ff88, 0 0 30px #00ff8855, 0 0 60px #00ff8833;
+      letter-spacing: -0.05em;
+      transition: color 0.2s, text-shadow 0.2s;
+    }
+    .countdown.reset {
+      color: #ff3355;
+      text-shadow: 0 0 10px #ff3355, 0 0 30px #ff335555;
+      animation: shake 0.3s;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+    .idle-hint {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      opacity: 0.7;
+      text-align: center;
+    }
+    .idle-hint strong { color: #00ff88; }
+    .your-intent {
+      margin-top: 2rem;
+      padding: 0.6rem 1.2rem;
+      background: rgba(0,255,136,0.05);
+      border: 1px solid rgba(0,255,136,0.2);
+      border-radius: 20px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* === כפתור ביטול נסתר === */
+    #cancel {
+      position: absolute;
+      background: transparent;
+      color: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 0.3rem 0.6rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.65rem;
+      font-family: inherit;
+      transition: color 0.3s, border-color 0.3s;
+      z-index: 100;
+    }
+    #cancel:hover {
+      color: rgba(255,255,255,0.5);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    /* === מסך 3: בחירה סופית === */
+    #choice h2 { font-weight: 400; font-size: 1.8rem; margin: 0; }
+    .pun { opacity: 0.6; font-size: 1rem; margin: 1rem 0 1.5rem; font-style: italic; }
+    .choices { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+    .choice-btn {
+      background: transparent;
+      border: 2px solid;
+      padding: 1.5rem 2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: all 0.2s;
+      min-width: 240px;
+      color: inherit;
+    }
+    .choice-btn .label { font-size: 1.2rem; font-weight: 700; display: block; margin-bottom: 0.4rem; }
+    .choice-btn .desc { font-size: 0.85rem; opacity: 0.7; }
+    .yes { border-color: #ff003355; color: #ff7799; }
+    .yes:hover { background: #ff003311; border-color: #ff0033; color: #ff99aa; }
+    .no { border-color: #00ff8855; color: #88ffbb; }
+    .no:hover { background: #00ff8811; border-color: #00ff88; color: #aaffcc; transform: scale(1.05); }
+
+    .target {
+      margin-top: 1rem;
+      opacity: 0.25;
+      font-size: 0.75rem;
+      max-width: 80%;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      direction: ltr;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div id="stats-bar">
+    <div>
+      <div class="label">היום ביוטיוב</div>
+      <div class="today" id="today-time">--</div>
+    </div>
+    <div class="week">
+      השבוע: <span id="week-time">--</span>
+    </div>
+  </div>
+
+  <div id="stage">
+
+    <!-- מסך 1: קטגוריה -->
+    <div class="view active" id="view-category">
+      <h1>למה אתה נכנס ליוטיוב?</h1>
+      <div class="sub">בחר בכנות - זה רק בינך לבין עצמך</div>
+      <div class="categories" id="categories">
+        <button class="cat-btn" data-cat="learn"><span class="emoji">📚</span>ללמוד משהו ספציפי</button>
+        <button class="cat-btn" data-cat="tech-news"><span class="emoji">📰</span>חדשות טכנולוגיה</button>
+        <button class="cat-btn" data-cat="music"><span class="emoji">🎵</span>מוזיקה לרקע</button>
+        <button class="cat-btn" data-cat="sent"><span class="emoji">🎬</span>סרטון ששלחו לי</button>
+        <button class="cat-btn" data-cat="work"><span class="emoji">💼</span>משהו לעבודה / דחוף</button>
+        <button class="cat-btn" data-cat="news"><span class="emoji">🌍</span>חדשות / אקטואליה</button>
+        <button class="cat-btn" data-cat="hobby"><span class="emoji">🎨</span>תחביב / עניין אישי</button>
+        <button class="cat-btn honest" data-cat="waste"><span class="emoji">🕳️</span>סתם, לבזבז זמן</button>
+      </div>
+    </div>
+
+    <!-- מסך 2: ספירה -->
+    <div class="view" id="view-countdown">
+      <h1>שב בשקט</h1>
+      <div class="sub">אל תזיז את העכבר, אל תיגע במקלדת. רגע אחד של נוכחות.</div>
+      <div class="countdown" id="count">10</div>
+      <div class="idle-hint">כל תנועה <strong>מאפסת את הספירה</strong></div>
+      <div class="your-intent" id="your-intent"></div>
+    </div>
+
+    <!-- מסך quick: grace period -->
+    <div class="view" id="view-quick">
+      <h1>ממשיך לראות? 👀</h1>
+      <div class="sub">אתה בתוך חלון 30 הדקות שאישרת קודם. רק לוודא שאתה עוד מתכוון.</div>
+      <div class="choices">
+        <button class="choice-btn yes" id="quick-yes">
+          <span class="label">כן, ממשיך ⏯️</span>
+          <span class="desc">חזרה לסרטונים, מאריך את ה-30 דק'</span>
+        </button>
+        <button class="choice-btn no" id="quick-no">
+          <span class="label">לא, מספיק 🌳</span>
+          <span class="desc">סגור את הכרטיסייה</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- מסך 3: בחירה -->
+    <div class="view" id="view-choice">
+      <h2>אז... להיכנס ליוטיוב?</h2>
+      <div class="pun" id="pun"></div>
+      <div class="choices">
+        <button class="choice-btn yes" id="yes">
+          <span class="label">כן, קח את היום שלי 🕳️</span>
+          <span class="desc">אני מוותר על השעתיים הקרובות מרצוני החופשי</span>
+        </button>
+        <button class="choice-btn no" id="no">
+          <span class="label">לא, יש לי חיים 🌳</span>
+          <span class="desc">סגור את הכרטיסייה הזאת מיד</span>
+        </button>
+      </div>
+      <div class="target" id="target"></div>
+    </div>
+
+    <button id="cancel" title="יציאה דחופה">× יציאה</button>
+  </div>
+
+  <script src="wait.js"></script>
+</body>
+</html>

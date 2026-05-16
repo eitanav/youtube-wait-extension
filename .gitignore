@@ -1,0 +1,19 @@
+# מפתח פרטי - לעולם לא לעלות! משמש לקיבוע מזהה התוסף
+extension_key.pem
+*.pem
+
+# קבצי Chrome packing
+*.crx
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
