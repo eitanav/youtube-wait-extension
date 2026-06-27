@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "YouTube 5-Second Wait",
+  "name": "YouTube Wait - Mindful Browsing",
   "version": "1.2",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApNuwTUDmdDW6ll9sz/LhnAGUww+sw3nVoceQuIGlwlxPU/r3xX5z//B0ZmKmxmIpjH+Jiz47AVYEEXhtlmJbdDNy9VpTV5oDM0vL9WMt4s03r72TITAR7DPBTE853m0NFPhVBBLn/LREB6bzCS51FdyPVTWxREnWbs7X7RTSp32MqbHqV0mv40HePeeybOb95CYzdx1gLh7mUS2aM+pvhDm3c6RvmESzHgKdzbPHVWIp8J8lnRJwNEUgekXAXMQfMoas32pGhT/Aa6ADJMXosPq0EIZgtEg5VF4DuNYBpXgWyB/XDdJYb5FjZr/SFJxYz/3LGJ1tlBO70SGThIk9wQIDAQAB",
-  "description": "ממתין לפני כניסה ליוטיוב + מעקב זמן בזבוז + הגדרות מותאמות",
+  "description": "Pause, choose, and reclaim control before YouTube hijacks your day. Adds intentional friction between you and the algorithm.",
   "permissions": ["webNavigation", "tabs", "storage", "alarms"],
   "host_permissions": ["*://*.youtube.com/*"],
   "background": {
